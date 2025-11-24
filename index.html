@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quickdoot Parcel Measurement</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --qd-blue: #2563eb;
+            --qd-green: #22c55e;
+            --qd-yellow: #eab308;
+            --qd-purple: #a855f7;
+            --qd-light-blue: #e3eafc;
+            --qd-light-green: #eafbe3;
+            --qd-light-yellow: #fffbe3;
+            --qd-light-purple: #f3e3fb;
+            --qd-gray: #f6f8fa;
+            --qd-radius: 20px;
+            --qd-shadow: 0 4px 16px rgba(37,99,235,0.10);
+            --qd-font: 'Inter', Arial, sans-serif;
+        }
+        body {
+            margin: 0;
+            font-family: var(--qd-font);
+            background: var(--qd-gray);
+            color: #222;
+        }
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #fff;
+            box-shadow: var(--qd-shadow);
+            border-radius: var(--qd-radius);
+            overflow: hidden;
+        }
+        .screen {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .screen.active {
+            display: flex;
+        }
+        /* Header */
+        .qd-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 20px 0 20px;
+        }
+        .qd-header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--qd-blue);
+            font-family: var(--qd-font);
+        }
+        .qd-header-sub {
+            font-size: 1rem;
+            color: #6b7a90;
+            font-family: var(--qd-font);
+            margin-top: 2px;
+        }
+        .qd-header-icons {
+            display: flex;
+            gap: 16px;
+        }
+        .qd-header-icon-btn {
+            background: var(--qd-light-blue);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.06);
+            cursor: pointer;
+        }
+        /* Statistics Card */
+        .qd-stats-card {
+            margin: 32px 20px 0 20px;
+            background: var(--qd-blue);
+            border-radius: var(--qd-radius);
+            box-shadow: var(--qd-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 20px;
+            color: #fff;
+        }
+        .qd-stats-main {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .qd-stats-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .qd-stats-sub {
+            display: flex;
+            gap: 24px;
+        }
+        .qd-stats-sub span {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+        /* Quick Actions */
+        .qd-section-label {
+            margin: 36px 20px 0 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--qd-blue);
+            font-family: var(--qd-font);
+        }
+        .qd-actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 20px 0 20px;
+        }
+        .qd-action-card {
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+            height: 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            background: #e3eafc;
+            transition: box-shadow 0.2s;
+        }
+        .qd-action-card.blue { background: var(--qd-light-blue); }
+        .qd-action-card.green { background: var(--qd-light-green); }
+        .qd-action-card.yellow { background: var(--qd-light-yellow); }
+        .qd-action-card.purple { background: var(--qd-light-purple); }
+        .qd-action-icon {
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qd-action-icon.blue { background: var(--qd-blue); }
+        .qd-action-icon.green { background: var(--qd-green); }
+        .qd-action-icon.yellow { background: var(--qd-yellow); }
+        .qd-action-icon.purple { background: var(--qd-purple); }
+        .qd-action-label {
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: var(--qd-font);
+        }
+        .qd-action-label.blue { color: var(--qd-blue); }
+        .qd-action-label.green { color: var(--qd-green); }
+        .qd-action-label.yellow { color: var(--qd-yellow); }
+        .qd-action-label.purple { color: var(--qd-purple); }
+        /* Camera Screen */
+        .camera-preview {
+            flex: 1;
+            background: var(--qd-gray);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 400px;
+        }
+        .camera-instructions {
+            width: 100%;
+            text-align: center;
+            color: var(--qd-blue);
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: var(--qd-font);
+            background: rgba(37,99,235,0.08);
+            padding: 16px 0 12px 0;
+            margin: 0;
+            border-radius: var(--qd-radius);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2;
+        }
+        .camera-image-card {
+            
+            position: relative;
+            width: 90%;
+            max-width: 320px;
+            height: 220px;
+            background: #fff;
+            border-radius: var(--qd-radius);
+            box-shadow: 0 2px 12px rgba(37,99,235,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 60px auto 0 auto;
+            
+        }
+        .auto-outline {
+            position: absolute;
+            border: 2px solid var(--qd-blue);
+            border-radius: var(--qd-radius);
+            pointer-events: none;
+            left: 40px;
+            top: 40px;
+            width: 160px;
+            height: 100px;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            z-index: 3;
+        }
+        .qd-primary-btn {
+            background: var(--qd-blue);
+            color: #fff;
+            border: none;
+            border-radius: var(--qd-radius);
+            width: 90%;
+            max-width: 320px;
+            height: 56px;
+            margin: 32px auto 32px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: var(--qd-font);
+            box-shadow: 0 2px 8px rgba(37,99,235,0.12);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .qd-primary-btn:hover {
+            background: #1746a2;
+        }
+        /* Results Screen */
+        .results-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px 16px 16px;
+        }
+        .results-image-card {
+            position: relative;
+            width: 90%;
+            max-width: 320px;
+            height: 220px;
+            /* background removed for transparent look */
+            border-radius: var(--qd-radius);
+            box-shadow: 0 2px 12px rgba(37,99,235,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .results-bbox {
+            position: absolute;
+            left: 40px;
+            top: 40px;
+            width: 160px;
+            height: 100px;
+            border: 2px solid var(--qd-blue);
+            border-radius: var(--qd-radius);
+            pointer-events: none;
+        }
+        .results-measure-row {
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .results-measure-card {
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+            height: 80px;
+            background: #e3eafc;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .results-measure-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--qd-blue);
+            font-family: var(--qd-font);
+        }
+        .results-measure-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #222;
+            font-family: var(--qd-font);
+        }
+        .results-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .results-actions .qd-primary-btn {
+            flex: 1;
+            height: 48px;
+        }
+        .results-actions .qd-secondary-btn {
+            flex: 1;
+            background: #fff;
+            color: var(--qd-blue);
+            border: 2px solid var(--qd-blue);
+            border-radius: var(--qd-radius);
+            height: 48px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: var(--qd-font);
+            box-shadow: 0 2px 8px rgba(37,99,235,0.04);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .results-actions .qd-secondary-btn:hover {
+            background: #e3eafc;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Homepage Screen -->
+        <div class="screen active" id="homeScreen">
+            <!-- Header -->
+            <div class="qd-header">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <img src="logo.jpg" alt="Logo" style="height: 32px; width: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(37,99,235,0.10); object-fit: contain;" />
+                        <div class="qd-header-title">Quickdoot</div>
+                    </div>
+                    <div class="qd-header-sub">Dashboard</div>
+                </div>
+                <div class="qd-header-icons">
+                    <button class="qd-header-icon-btn">
+                        <!-- Notification Bell Icon -->
+                        <svg width="22" height="22" fill="none"><path d="M11 19c1.1 0 2-.9 2-2h-4a2 2 0 002 2zm6-6V9a6 6 0 10-12 0v4a2 2 0 01-2 2v1h16v-1a2 2 0 01-2-2z" stroke="#2563eb" stroke-width="2"/></svg>
+                    </button>
+                    <button class="qd-header-icon-btn">
+                        <!-- Profile Icon -->
+                        <svg width="22" height="22" fill="none"><circle cx="11" cy="8" r="4" stroke="#2563eb" stroke-width="2"/><path d="M4 19c0-3.3 3.6-5 7-5s7 1.7 7 5" stroke="#2563eb" stroke-width="2"/></svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Statistics Card -->
+            <div class="qd-stats-card">
+                <div>
+                    <div class="qd-stats-label">Active Deliveries</div>
+                    <div class="qd-stats-main">3</div>
+                    <div class="qd-stats-sub">
+                        <span>Completed: <span style="font-weight:600;">127</span></span>
+                        <span>Pending: <span style="font-weight:600;">8</span></span>
+                    </div>
+                </div>
+                <div>
+                    <!-- Delivery Truck Icon -->
+                    <svg width="56" height="40" fill="none" style="margin-left:12px;"><rect x="8" y="16" width="32" height="16" rx="6" fill="#fff" opacity="0.18"/><rect x="28" y="20" width="16" height="12" rx="4" fill="#e3eafc"/><rect x="12" y="22" width="12" height="6" rx="2" fill="#b3c7f7"/><rect x="8" y="16" width="32" height="16" rx="6" stroke="#fff" stroke-width="2"/><circle cx="18" cy="34" r="4" fill="#fff"/><circle cx="38" cy="34" r="4" fill="#fff"/></svg>
+                </div>
+            </div>
+            <!-- Quick Actions Section -->
+            <div class="qd-section-label">Quick Actions</div>
+            <div class="qd-actions-grid">
+                <button class="qd-action-card blue" onclick="showScreen('cameraScreen')">
+                    <span class="qd-action-icon blue">
+                        <svg width="28" height="28" fill="none"><rect x="6" y="10" width="16" height="8" rx="4" fill="#fff"/><rect x="10" y="14" width="8" height="4" rx="2" fill="#b3c7f7"/><rect x="6" y="10" width="16" height="8" rx="4" stroke="#2563eb" stroke-width="2"/></svg>
+                    </span>
+                    <span class="qd-action-label blue">Measure Parcel</span>
+                </button>
+                <button class="qd-action-card green">
+                    <span class="qd-action-icon green">
+                        <svg width="28" height="28" fill="none"><rect x="4" y="12" width="16" height="8" rx="4" fill="#fff"/><rect x="14" y="16" width="8" height="4" rx="2" fill="#b3c7f7"/><rect x="4" y="12" width="16" height="8" rx="4" stroke="#22c55e" stroke-width="2"/></svg>
+                    </span>
+                    <span class="qd-action-label green">Schedule Pickup</span>
+                </button>
+                <button class="qd-action-card yellow">
+                    <span class="qd-action-icon yellow">
+                        <svg width="28" height="28" fill="none"><circle cx="14" cy="14" r="10" fill="#fff"/><circle cx="14" cy="14" r="10" stroke="#eab308" stroke-width="2"/><rect x="10" y="12" width="8" height="4" rx="2" fill="#b3c7f7"/></svg>
+                    </span>
+                    <span class="qd-action-label yellow">Track Delivery</span>
+                </button>
+                <button class="qd-action-card purple">
+                    <span class="qd-action-icon purple">
+                        <svg width="28" height="28" fill="none"><rect x="6" y="8" width="16" height="12" rx="4" fill="#fff"/><rect x="10" y="14" width="8" height="4" rx="2" fill="#b3c7f7"/><rect x="6" y="8" width="16" height="12" rx="4" stroke="#a855f7" stroke-width="2"/></svg>
+                    </span>
+                    <span class="qd-action-label purple">My Orders</span>
+                </button>
+            </div>
+        </div>
+        <!-- Camera Measurement Screen -->
+        <div class="screen" id="cameraScreen">
+            <div class="camera-preview" id="cameraPreview">
+                <div class="camera-instructions">Place the parcel on a plain background</div>
+                <div class="camera-image-card">
+                    <!-- Simulated camera preview (replace with real camera in production) -->
+                    <svg width="240" height="160" style="border-radius:20px; background:#e3eafc;" viewBox="0 0 240 160">
+                        <rect x="40" y="40" width="160" height="80" rx="20" fill="#fff" stroke="#b3c7f7" stroke-width="2"/>
+                        <rect x="80" y="80" width="80" height="32" rx="10" fill="#b3c7f7"/>
+                    </svg>
+                    <div class="auto-outline" id="autoOutline" style="display:none;"></div>
+                </div>
+                <button class="qd-primary-btn" onclick="showScreen('resultsScreen')">Capture Measurement</button>
+            </div>
+        </div>
+        <!-- Measurement Results Screen -->
+        <div class="screen" id="resultsScreen">
+            <div class="results-preview">
+                <div class="results-image-card">
+                    <!-- User-added image for parcel result -->
+                    <img src="I.webp" alt="Parcel Result" style="width: 90%; max-width: 220px; height: 140px; object-fit: cover; border-radius: 20px; box-shadow: 0 2px 12px rgba(37,99,235,0.08); margin-top: 12px;" />
+                    <div class="results-bbox"></div>
+                </div>
+                <div class="results-measure-row">
+                    <div class="results-measure-card">
+                        <div class="results-measure-label">Length</div>
+                        <div class="results-measure-value">32 cm</div>
+                    </div>
+                    <div class="results-measure-card">
+                        <div class="results-measure-label">Width</div>
+                        <div class="results-measure-value">18 cm</div>
+                    </div>
+                    <div class="results-measure-card">
+                        <div class="results-measure-label">Height</div>
+                        <div class="results-measure-value">12 cm</div>
+                    </div>
+                </div>
+                <div class="results-actions">
+                    <button class="qd-primary-btn" onclick="alert('Measurement saved!')">Save Measurement</button>
+                    <button class="qd-secondary-btn" onclick="showScreen('cameraScreen')">Retake</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            // Simulate auto-outline on camera screen
+            if (screenId === 'cameraScreen') {
+                setTimeout(() => {
+                    document.getElementById('autoOutline').style.display = 'block';
+                }, 600);
+            } else {
+                document.getElementById('autoOutline').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+<img src="your-image.jpg" alt="Parcel" style="width: 90%; max-width: 220px; height: 140px; object-fit: cover; border-radius: 20px; box-shadow: 0 2px 12px rgba(37,99,235,0.08); background: #e3eafc;" />
